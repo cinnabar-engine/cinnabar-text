@@ -3,5 +3,6 @@ include_directories(
 	${CE_INCLUDE}
 )
 
+add_subdirectory(cinnabar-text)
 add_subdirectory(executable-example)
 add_subdirectory(library-example)

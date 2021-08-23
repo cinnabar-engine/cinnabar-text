@@ -13,6 +13,7 @@ add_executable(${NAME}
 target_link_libraries(${NAME}
 	${CE_LIBS}
 	library-example
+	cinnabar-text
 )
 
 add_custom_command(TARGET ${NAME}

@@ -8,6 +8,8 @@
 
 #include <library-example/noise_texture.hpp>
 
+#include <cinnabar-text/cinnabar-text.hpp>
+
 int main(int argc, char* argv[]) {
 	ce::Time* time = new ce::Time();
 
@@ -33,6 +35,12 @@ int main(int argc, char* argv[]) {
 	environmentBuildingsMaterial->setTexture("color.png");
 	environmentPos->setPosition(0.0f, -1.0f, 0.0f);
 
+	ce::Text* text = new ce::Text("abc", "/usr/share/fonts/truetype/Roboto-Regular.ttf", 16);
+	ce::Transform* textPos = new ce::Transform();
+	ce::Material* textMaterial = new ce::Material("color");
+	textMaterial->getShader()->setUniform("material.color", glm::vec4(1.f, 1.f, 0, 1));
+	textPos->setPosition(0.f, 3.f, 0.f);
+
 	double mouseSens = 0.05;
 	ce::Camera* camera = new ce::Camera();
 	// TODO: Seperate so i can put in a player class later
@@ -46,6 +54,7 @@ int main(int argc, char* argv[]) {
 	while (running) {
 		time->update();
 		std::cout << "fps: " << time->getFPS() << std::endl;
+		text->setText("fps: " + std::to_string(time->getFPS()));
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -148,12 +157,16 @@ int main(int argc, char* argv[]) {
 		renderEngine->clear();
 		renderEngine->render(blobMesh, blobMaterial, blobPos, camera);
 		renderEngine->render(environmentMesh, environmentGroundMaterial, environmentPos, camera);
+		text->render(renderEngine, textPos, camera, textMaterial);
 
 		window->swapBuffers();
 
 		// framerate cap
 		time->waitUntilDelta(deltaTimeMin);
 	}
+
+	delete text;
+
 	delete blobMesh;
 	delete blobMaterial;
 	delete blobPos;
