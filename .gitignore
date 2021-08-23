@@ -1,0 +1,12 @@
+.vscode/
+*.kdev4
+
+build/
+dockerfile
+!*/dockerfile
+
+pkg
+
+*.dll
+*.lib
+*.so

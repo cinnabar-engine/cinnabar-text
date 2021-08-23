@@ -1,0 +1,22 @@
+find_package(PkgConfig REQUIRED)
+
+find_package(SDL2 REQUIRED)
+
+find_package(cinnabar-core REQUIRED)
+find_package(cinnabar-render REQUIRED)
+
+
+set(CE_LIBS
+	${SDL2_LIBRARIES}
+	${CE_CORE_LIBRARIES}
+	${CE_RENDER_LIBRARIES}
+
+	PARENT_SCOPE
+)
+set(CE_INCLUDE
+	${SDL2_INCLUDE_DIRS}
+	${CE_CORE_INCLUDE_DIRS}
+	${CE_RENDER_INCLUDE_DIRS}
+
+	PARENT_SCOPE
+)
