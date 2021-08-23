@@ -11,7 +11,6 @@
 namespace ce {
 	class Text {
 
-
 		struct Character {
 			ce::Font::Character* character;
 			Transform* transform;

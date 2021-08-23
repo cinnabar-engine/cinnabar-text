@@ -143,6 +143,8 @@ int main(int argc, char* argv[]) {
 		blobPos->yaw(50.0 * time->getDeltaTime());
 		blobPos->pitch(100.0 * time->getDeltaTime());
 
+		textPos->roll(50.0 * time->getDeltaTime());
+
 		// Move camera
 		glm::vec3
 			cameraRight = camera->transform->getRight(true, false, false),

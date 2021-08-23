@@ -38,26 +38,25 @@ void ce::Text::setText(std::string content) {
 }
 
 void ce::Text::render(ce::RenderEngine* renderEngine, ce::Transform* transform, ce::Camera* camera, ce::Material* material) {
-
 	for (unsigned int i = 0; i < m_characters.size(); i++) {
-		Character character = m_characters[i];
+		Character* character = &m_characters[i];
 
-		character.transform->setParent(transform);
-		if (character.character->material)
-			setCharColor(character.character, m_color);
-		if (character.points.size()) {
-			for (int i = 0; i < character.points.size(); i++) {
+		character->transform->setParent(transform);
+		if (character->character->material)
+			setCharColor(character->character, m_color);
+		if (character->points.size()) {
+			for (int i = 0; i < character->points.size(); i++) {
 				renderEngine->render(
-					character.character->mesh,
-					m_make_3d ? material : character.character->material,
-					&character.points[i],
+					character->character->mesh,
+					m_make_3d ? material : character->character->material,
+					&character->points[i],
 					camera);
 			}
 		} else {
 			renderEngine->render(
-				character.character->mesh,
-				m_make_3d ? material : character.character->material,
-				character.transform,
+				character->character->mesh,
+				m_make_3d ? material : character->character->material,
+				character->transform,
 				camera);
 		}
 	}
@@ -107,27 +106,13 @@ int ce::Text::bindChar(ce::Font* font, char c) {
 	return 0;
 }
 
-ce::Texture* fontToTexture(FT_Face font_face) {
-	GLenum type = GL_TEXTURE_2D;
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	ce::Texture* texture = new ce::Texture(font_face->glyph->bitmap.buffer, font_face->glyph->bitmap.width, font_face->glyph->bitmap.rows, GL_RED, type);
-
+ce::Texture* glyphToTexture(FT_GlyphSlot glyph) {
+	ce::Texture* texture = new ce::Texture(glyph->bitmap.buffer, glyph->bitmap.width, glyph->bitmap.rows, GL_RED);
+	// glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	// glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	return texture;
-
-	//bind();
-	//glGenTextures(1, &m_texture);
-
-
-	//unbind();
-
-	// if (this->loadData(font_face->glyph->bitmap.buffer, font_face->glyph->bitmap.width, font_face->glyph->bitmap.rows, GL_RED)) {
-	// 	LOG_SUCCESS("Loaded texture");
-	// } else
-	// 	LOG_ERROR("TEXTURE_LOADING_FAILED");
 }
 
 ce::MeshFile createPlane(float width, float height, glm::vec2 origin) {
@@ -158,31 +143,36 @@ ce::MeshFile createPlane(float width, float height, glm::vec2 origin) {
 ce::Font::Character* ce::Text::getCharacter(Font* font, char c) {
 	ce::Font::Character* character = &font->characters[c];
 	if (character->c != c) {
+		*character = {c};
 		if (bindChar(font, c))
 			return NULL;
 
 		glm::ivec2 size(font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows),
 			bearing(font->face->glyph->bitmap_left, font->face->glyph->bitmap_top);
-		unsigned int advance = font->face->glyph->advance.x;
-		ce::Texture* fontTexture = fontToTexture(font->face);
-		ce::Material* material = new ce::Material("texture-tint");
-		material->setTexture(fontTexture);
+		character->size = size;
+		character->bearing = bearing;
+		character->advance = font->face->glyph->advance.x;
+		character->material = new ce::Material("texture-tint");
+		printf("%c", c);
+		//ce::Texture* fontTexture = new ce::Texture(font->face->glyph->bitmap.buffer, font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows, GL_RED);
+		character->material->setTexture(new ce::Texture(font->face->glyph->bitmap.buffer, font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows, GL_RED));
 
 		glm::vec2 scale(modal_scale),
 			dimensions(
 				size.x * scale.x,
 				size.y * scale.y);
+		character->scale = scale;
 
-		ce::Mesh* mesh = new ce::Mesh(createPlane(dimensions.x, dimensions.y, glm::vec2(0)));
+		character->mesh = new ce::Mesh(createPlane(dimensions.x, dimensions.y, glm::vec2(0)));
 
-		*character = {
+		/**character = {
 			c,
 			size,
 			bearing,
 			advance,
 			scale,
 			material,
-			mesh};
+			mesh};*/
 	}
 	return character;
 }
@@ -241,7 +231,7 @@ ce::Font::Character* ce::Text::getCharacter3D(Font* font, char c) {
 }
 
 void ce::Text::bind() {
-	ce::assetManager::getFont(m_font_path, *m_font);
+	ce::assetManager::getFont(m_font_path, m_font);
 
 	if (FT_Set_Pixel_Sizes(m_font->face, 0, m_font_size * font_resolution)) {
 		LOG_ERROR("Error setting font size.");

@@ -21,11 +21,11 @@ namespace ce {
 			Material* material;
 			Mesh* mesh;
 			std::vector<glm::vec2> points;
-		} characters[255] = {};
+		} characters[256] = {};
 	};
 
 	namespace assetManager {
-		void getFont(std::string filename, ce::Font& font);
+		void getFont(std::string filename, ce::Font*& font);
 		void closeFont(Font* font);
 	}
 }
