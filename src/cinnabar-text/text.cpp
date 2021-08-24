@@ -14,7 +14,7 @@ float
 	modal_scale = 1.f / (20.f * font_resolution);
 
 ce::Text::Text(std::string content, const char* font_path, unsigned int size, bool make_3d)
-	: m_font(new ce::Font), m_cursor(0), m_font_path(font_path), m_make_3d(make_3d) {
+	: m_font(ce::assetManager::getFont(m_font_path)), m_cursor(0), m_font_path(font_path), m_make_3d(make_3d) {
 	setSize(size);
 	setColor(glm::vec4(1.f, 1.f, 0, 1.f));
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -231,7 +231,7 @@ ce::Font::Character* ce::Text::getCharacter3D(Font* font, char c) {
 }
 
 void ce::Text::bind() {
-	ce::assetManager::getFont(m_font_path, m_font);
+	ce::assetManager::getFont(m_font_path);
 
 	if (FT_Set_Pixel_Sizes(m_font->face, 0, m_font_size * font_resolution)) {
 		LOG_ERROR("Error setting font size.");

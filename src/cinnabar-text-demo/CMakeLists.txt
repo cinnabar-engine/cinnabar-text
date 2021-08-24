@@ -1,4 +1,4 @@
-set(NAME executable-example)
+set(NAME cinnabar-text-demo)
 
 file(GLOB_RECURSE SRC
 	"*.cpp"

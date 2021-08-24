@@ -4,5 +4,5 @@ include_directories(
 )
 
 add_subdirectory(cinnabar-text)
-add_subdirectory(executable-example)
+add_subdirectory(cinnabar-text-demo)
 add_subdirectory(library-example)

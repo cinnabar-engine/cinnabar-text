@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 	while (running) {
 		time->update();
 		std::cout << "fps: " << time->getFPS() << std::endl;
-		text->setText("fps: " + std::to_string(time->getFPS()));
+		//text->setText("fps: " + std::to_string(time->getFPS()));
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
 		blobPos->yaw(50.0 * time->getDeltaTime());
 		blobPos->pitch(100.0 * time->getDeltaTime());
 
-		textPos->roll(50.0 * time->getDeltaTime());
+		//textPos->roll(50.0 * time->getDeltaTime());
 
 		// Move camera
 		glm::vec3

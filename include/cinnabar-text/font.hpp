@@ -25,7 +25,7 @@ namespace ce {
 	};
 
 	namespace assetManager {
-		void getFont(std::string filename, ce::Font*& font);
+		ce::Font* getFont(std::string filename);
 		void closeFont(Font* font);
 	}
 }
