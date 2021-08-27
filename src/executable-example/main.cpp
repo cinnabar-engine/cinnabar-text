@@ -35,11 +35,14 @@ int main(int argc, char* argv[]) {
 	environmentBuildingsMaterial->setTexture("color.png");
 	environmentPos->setPosition(0.0f, -1.0f, 0.0f);
 
-	ce::Text* text = new ce::Text("abc", "/usr/share/fonts/truetype/Roboto-Regular.ttf", 16);
+	ce::assetManager::initFreeType();
+
+	ce::Font* font = new ce::Font("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", 8)
+	ce::Text* text = new ce::Text("abc", font);
 	ce::Transform* textPos = new ce::Transform();
 	ce::Material* textMaterial = new ce::Material("color");
-	textMaterial->getShader()->setUniform("material.color", glm::vec4(1.f, 1.f, 0, 1));
-	textPos->setPosition(0.f, 3.f, 0.f);
+	textMaterial->getShader()->setUniform("material.color", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	textPos->setPosition(0.0f, 3.0f, 0.0f);
 
 	double mouseSens = 0.05;
 	ce::Camera* camera = new ce::Camera();
@@ -166,6 +169,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	delete text;
+	delete font;
+	ce::assetManager::closeFreeType();
 
 	delete blobMesh;
 	delete blobMaterial;

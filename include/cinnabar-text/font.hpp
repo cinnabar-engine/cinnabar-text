@@ -10,22 +10,35 @@
 
 
 namespace ce {
-	struct Font {
-		FT_Library library;
+	class Font {
+	 public:
+		Font(const char* path, unsigned int pixel_width, unsigned int pixel_height, bool do3d = false);
+		Font(const char* path, unsigned int pixel_size, bool do3d = false) : Font(path, pixel_size, pixel_size, do3d){};
+		~Font();
+
+		static FT_Library library;
 		FT_Face face;
-		struct Character {
-			char c;
-			glm::ivec2 size, bearing;
-			unsigned int advance;
-			glm::vec2 scale;
-			Material* material;
+
+		typedef struct {
+			glm::ivec2 size; // TODO: what is this?
+			glm::ivec2 bearing; // TODO: what is this?
+			unsigned int advance; // TODO: what is this?
+			glm::vec2 scale; // TODO: what is this?
 			Mesh* mesh;
-			std::vector<glm::vec2> points;
-		} characters[255] = {};
+			Texture* texture; // TODO: should a transform be used to store
+		} Character;
+		Character characters[256];
+
+		bool is3d;
+
+	 private:
+		void generateCharacters(bool do3d);
 	};
 
 	namespace assetManager {
-		void getFont(std::string filename, ce::Font& font);
-		void closeFont(Font* font);
+		FT_Error initFreeType();
+		FT_Error closeFreeType();
+		FT_Error getFont(std::string filename, ce::Font& font);
+		FT_Error closeFont(Font* font);
 	}
 }

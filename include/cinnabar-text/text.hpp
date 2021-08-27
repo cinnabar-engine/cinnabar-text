@@ -10,43 +10,29 @@
 
 namespace ce {
 	class Text {
-
-
-		struct Character {
+		typedef struct {
 			ce::Font::Character* character;
-			Transform* transform;
-			std::vector<Transform> points;
-		};
+			ce::Transform* transform; // only position is used but using the transform class allows parenting
+		} CharacterInstance;
 
 	 public:
-		Text(std::string content, const char* font, unsigned int size, bool make_3d = false);
-		~Text();
+		// no overload is given for a Font path because it would be impossible to delete the Font
+		Text(std::string content, ce::Font* font);
 
 		void setText(std::string content);
-		void setColor(glm::vec4 color) { m_color = color; }
-		void setSize(float size) { m_font_size = size; }
 
 		void render(RenderEngine* renderEngine, Transform* transform, ce::Camera* camera, ce::Material* material = NULL);
 
 	 private:
-		bool m_make_3d;
 		std::string m_content;
 		glm::vec2 m_cursor;
-		const char* m_font_path;
-		float m_font_size;
-		Font* m_font;
-		glm::vec4 m_color;
-		std::vector<Character> m_characters;
+		ce::Font* m_font;
+		static ce::Material material = ce::Material("basic"); // not a pointer, since this never gets changed
+		std::vector<CharacterInstance> m_characters;
 
 		void pushChar(char c);
-		void clearChars();
 
-		void setCharColor(ce::Font::Character* character, glm::vec4 color);
 		static int bindChar(ce::Font* font, char c);
 		static ce::Font::Character* getCharacter(ce::Font* font, char c);
-		static ce::Font::Character* getCharacter3D(ce::Font* font, char c);
-
-		void bind();
-		void unbind();
 	};
 }
