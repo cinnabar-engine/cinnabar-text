@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	ce::Font* font = new ce::Font("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", 8);
 	ce::Text* text = new ce::Text("abc", font);
 	ce::Transform* textPos = new ce::Transform();
-	ce::Material* textMaterial = new ce::Material("color");
+	ce::Material* textMaterial = new ce::Material("texture-tint");
 	textMaterial->getShader()->setUniform("material.color", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	textPos->setPosition(0.0f, 3.0f, 0.0f);
 
