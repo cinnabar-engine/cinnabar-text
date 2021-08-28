@@ -12,8 +12,8 @@
 namespace ce {
 	class Font {
 	 public:
-		Font(const char* path, unsigned int pixel_width, unsigned int pixel_height, bool do3d = false);
-		Font(const char* path, unsigned int pixel_size, bool do3d = false) : Font(path, pixel_size, pixel_size, do3d){};
+		Font(const char* path, glm::ivec2 pixel_size, bool do3d = false);
+		Font(const char* path, unsigned int pixel_size, bool do3d = false) : Font(path, glm::ivec2(pixel_size), do3d){};
 		~Font();
 
 		static FT_Library library;
@@ -25,14 +25,15 @@ namespace ce {
 			unsigned int advance; // TODO: what is this?
 			glm::vec2 scale; // TODO: what is this?
 			Mesh* mesh;
-			Texture* texture; // TODO: should a transform be used to store
+			Texture* texture;
 		} Character;
 		Character characters[256];
 
-		bool is3d;
-
 	 private:
-		void generateCharacters(bool do3d);
+		void cacheCharacters(bool do3d);
+		void cacheCharacter(char c, bool do3d);
+		int loadCharacter(char c);
+		ce::Texture* fontToTexture();
 	};
 
 	namespace assetManager {

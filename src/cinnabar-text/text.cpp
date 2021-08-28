@@ -11,10 +11,6 @@
 
 #include <cinnabar-text/font.hpp>
 
-float
-	font_resolution = 100.0f,
-	modal_scale = 1.f / (20.f * font_resolution);
-
 ce::Text::Text(std::string content, ce::Font* font)
 	: m_font(font), m_cursor(0) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -38,11 +34,8 @@ void ce::Text::render(ce::RenderEngine* renderEngine, ce::Transform* transform, 
 		charInstance.transform->setParent(transform); // TODO: do this when creating the characters, check that the function saves the parent as a pointer with transform
 
 		if (charInstance.character->mesh) {
-			if (!material) {
-				material
-			}
 			if (charInstance.character->texture) {
-				
+				material->setTexture(charInstance.character->texture); // TODO: do something with old texture, currently this causes a memory leak
 			}
 
 			renderEngine->render(
@@ -56,9 +49,7 @@ void ce::Text::render(ce::RenderEngine* renderEngine, ce::Transform* transform, 
 
 void ce::Text::pushChar(char c) {
 	ce::Transform* transform = new ce::Transform();
-	ce::Font::Character* character = m_make_3d ? getCharacter3D(m_font, c) : getCharacter(m_font, c);
-	if (!character)
-		return;
+	ce::Font::Character* character = &(m_font->characters[c]);
 	transform->setPosition(
 		m_cursor.x + character->bearing.x * character->scale.x,
 		m_cursor.y - (character->size.y - character->bearing.y) * character->scale.y,

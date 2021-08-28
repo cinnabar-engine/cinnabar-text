@@ -5,28 +5,88 @@
 
 FT_Library ce::Font::library;
 
-ce::Font::Font(const char* path, unsigned int pixel_width, unsigned int pixel_height, bool do3d)
-	: is3d(do3d) {
+float
+	font_resolution = 100.0f,
+	modal_scale = 1.f / (20.f * font_resolution);
+
+ce::MeshFile createPlane(float width, float height, glm::vec2 origin) {
+	float left = -width * origin.x,
+			right = width + left,
+			up = -height * origin.y,
+			down = height + up;
+	return {
+		{
+
+			{glm::vec3(left, up, 0), glm::vec3(0, 1.f, 0), glm::vec2(0, 1.f)},
+			{glm::vec3(right, up, 0), glm::vec3(0, 1.f, 0), glm::vec2(1.f, 1.f)},
+			{glm::vec3(left, down, 0), glm::vec3(0, 1.f, 0), glm::vec2(0, 0)},
+			{glm::vec3(right, down, 0), glm::vec3(0, 1.f, 0), glm::vec2(1.f, 0)},
+		},
+		{0, 1, 2, 2, 1, 3},
+	};
+}
+
+
+ce::Font::Font(const char* path, glm::ivec2 pixel_size, bool do3d) {
 	if (FT_New_Face(ce::Font::library, path, 0, &this->face)) {
 		LOG_ERROR("Error obtaining font face: %s", path);
 	} else {
 		LOG_SUCCESS("Successfully obtained font face: %s", path);
 	}
 
-	if (FT_Set_Pixel_Sizes(this->face, pixel_width, pixel_height)) {
+	if (FT_Set_Pixel_Sizes(this->face, pixel_size.x, pixel_size.y)) {
 		LOG_ERROR("Error setting font size.");
 	} else {
 		LOG_SUCCESS("Successfully set font size.");
 	}
 
-	generateCharacters(do3d);
+	cacheCharacters(do3d);
 }
 ce::Font::~Font() {
 	ce::assetManager::closeFont(this);
 }
 
 
-void ce::Font::generateCharacters(bool do3d) {
+void ce::Font::cacheCharacters(bool do3d) {
+	for (unsigned char c = 1; c < 128; c++)
+		cacheCharacter(c, do3d);
+}
+void ce::Font::cacheCharacter(char c, bool do3d) {
+	if (loadCharacter(c))
+		return;
+
+	glm::ivec2 size = glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows);
+	characters[c].size = size;
+	characters[c].bearing = glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top);
+	characters[c].advance = face->glyph->advance.x;
+	characters[c].texture = fontToTexture();
+
+	glm::vec2 scale(modal_scale),
+		dimensions(
+			size.x * scale.x,
+			size.y * scale.y);
+
+	characters[c].mesh = new ce::Mesh(createPlane(dimensions.x, dimensions.y, glm::vec2(0)));
+}
+int ce::Font::loadCharacter(char c) {
+	if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+		LOG_ERROR("Error loading character: %c", c);
+		return 1;
+	} else {
+		LOG_SUCCESS("Successfully loaded character: %c", c);
+		return 0;
+	}
+}
+ce::Texture* ce::Font::fontToTexture() {
+	GLenum type = GL_TEXTURE_2D;
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	ce::Texture* texture = new ce::Texture(face->glyph->bitmap.buffer, face->glyph->bitmap.width, face->glyph->bitmap.rows, GL_RED, type);
+
+	return texture;
 }
 
 
@@ -57,114 +117,10 @@ FT_Error ce::assetManager::closeFont(ce::Font* font) {
 }
 
 /*
-int ce::Text::bindChar(ce::Font* font, char c) {
-	if (FT_Load_Char(font->face, c, FT_LOAD_RENDER)) {
-		LOG_ERROR("Error loading character: %c", c);
-		return 1;
-	}
-	LOG_SUCCESS("Successfully loaded character: %c", c);
-	return 0;
-}
+void ce::Font::createCharacter3D(char c) {
+	//Create mesh of character
 
-ce::Texture* fontToTexture(FT_Face font_face) {
-	GLenum type = GL_TEXTURE_2D;
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	ce::Texture* texture = new ce::Texture(font_face->glyph->bitmap.buffer, font_face->glyph->bitmap.width, font_face->glyph->bitmap.rows, GL_RED, type);
-
-	return texture;
-
-	//bind();
-	//glGenTextures(1, &m_texture);
-
-
-	//unbind();
-
-	// if (this->loadData(font_face->glyph->bitmap.buffer, font_face->glyph->bitmap.width, font_face->glyph->bitmap.rows, GL_RED)) {
-	// 	LOG_SUCCESS("Loaded texture");
-	// } else
-	// 	LOG_ERROR("TEXTURE_LOADING_FAILED");
-}
-
-ce::MeshFile createPlane(float width, float height, glm::vec2 origin) {
-	float left = -width * origin.x,
-			right = width + left,
-			up = -height * origin.y,
-			down = height + up;
-	return {
-		{
-
-			{glm::vec3(left, up, 0), glm::vec3(0, 1.f, 0), glm::vec2(0, 1.f)},
-			{glm::vec3(right, up, 0), glm::vec3(0, 1.f, 0), glm::vec2(1.f, 1.f)},
-			{glm::vec3(left, down, 0), glm::vec3(0, 1.f, 0), glm::vec2(0, 0)},
-			{glm::vec3(right, down, 0), glm::vec3(0, 1.f, 0), glm::vec2(1.f, 0)},
-		},
-		{
-			0,
-			1,
-			2,
-			2,
-			1,
-			3,
-		},
-	};
-}
-
-
-ce::Font::Character* ce::Text::getCharacter(Font* font, char c) {
-	ce::Font::Character* character = font->characters[c];
-	if (character->c != c) {
-		if (bindChar(font, c))
-			return NULL;
-
-		glm::ivec2 size(font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows),
-			bearing(font->face->glyph->bitmap_left, font->face->glyph->bitmap_top);
-		unsigned int advance = font->face->glyph->advance.x;
-		ce::Texture* fontTexture = fontToTexture(font->face);
-		ce::Material* material = new ce::Material("texture-tint");
-		material->setTexture(fontTexture);
-
-		glm::vec2 scale(modal_scale),
-			dimensions(
-				size.x * scale.x,
-				size.y * scale.y);
-
-		ce::Mesh* mesh = new ce::Mesh(createPlane(dimensions.x, dimensions.y, glm::vec2(0)));
-
-		*character = {
-			c,
-			size,
-			bearing,
-			advance,
-			scale,
-			material,
-			mesh};
-	}
-	return character;
-}
-
-ce::Font::Character* ce::Text::getCharacter3D(Font* font, char c) {
-	ce::Font::Character* character = &font->characters[c];
-	if (character->c != c) {
-		if (bindChar(font, c))
-			return NULL;
-
-		glm::ivec2 size(font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows),
-			bearing(font->face->glyph->bitmap_left, font->face->glyph->bitmap_top);
-		unsigned int advance = font->face->glyph->advance.x;
-
-		glm::vec2 scale(modal_scale),
-			dimensions(
-				size.x * scale.x,
-				size.y * scale.y);
-
-
-		//Create mesh of character
-
-		/*
+	/*
 			typedef struct  FT_Outline_
 			{
 				short       n_contours;       number of contours in glyph        
@@ -173,29 +129,15 @@ ce::Font::Character* ce::Text::getCharacter3D(Font* font, char c) {
 				char*       tags;             the points flags                   
 				short*      contours;         the contour end points             
 				int         flags;            outline masks                      
-			} */
-/*
-		FT_Outline outline = font->face->glyph->outline;
-		std::vector<glm::vec2> points;
-		for (unsigned int i = 0; i < outline.n_points; i++) {
-			FT_Vector p = outline.points[i];
-			glm::vec2 point(p.x, p.y);
-			points.push_back(point);
-		}
+			} *//*
 
-
-		ce::Mesh* mesh = new ce::Mesh(createPlane(.01f, .01f, glm::vec2(0)));
-
-		*character = {
-			c,
-			size,
-			bearing,
-			advance,
-			scale,
-			NULL,
-			mesh,
-			points};
+	std::vector<glm::vec2> points;
+	for (FT_Vector p : font->face->glyph->outline.points) {
+		glm::vec2 point(p.x, p.y);
+		points.push_back(point);
 	}
-	return character;
+
+
+	ce::Mesh* mesh = new ce::Mesh(createPlane(.01f, .01f, glm::vec2(0)));
 }
 */

@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 
 	ce::assetManager::initFreeType();
 
-	ce::Font* font = new ce::Font("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", 8)
+	ce::Font* font = new ce::Font("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", 8);
 	ce::Text* text = new ce::Text("abc", font);
 	ce::Transform* textPos = new ce::Transform();
 	ce::Material* textMaterial = new ce::Material("color");

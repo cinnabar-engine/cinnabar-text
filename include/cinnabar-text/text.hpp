@@ -21,13 +21,12 @@ namespace ce {
 
 		void setText(std::string content);
 
-		void render(RenderEngine* renderEngine, Transform* transform, ce::Camera* camera, ce::Material* material = NULL);
+		void render(RenderEngine* renderEngine, Transform* transform, ce::Camera* camera, ce::Material* material);
 
 	 private:
 		std::string m_content;
 		glm::vec2 m_cursor;
 		ce::Font* m_font;
-		static ce::Material material = ce::Material("basic"); // not a pointer, since this never gets changed
 		std::vector<CharacterInstance> m_characters;
 
 		void pushChar(char c);
