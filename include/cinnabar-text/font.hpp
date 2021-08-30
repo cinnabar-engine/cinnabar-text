@@ -27,7 +27,7 @@ namespace ce {
 			Mesh* mesh;
 			Texture* texture;
 		} Character;
-		Character characters[256];
+		Character characters[128];
 
 	 private:
 		void cacheCharacters(bool do3d);
