@@ -1,0 +1,8 @@
+Package: libcinnabar-text-dev
+Version: 0.0.0
+Section: development
+Priority: optional
+Architecture: all
+Depends: libcinnabar-text, libcinnabar-render-dev, libcinnabar-core-dev, libassimp-dev, libsdl2-dev
+Maintainer: tumblegamer@gmail.com
+Description: Cinnabar Text development libraries

@@ -1,2 +1,1 @@
-executable-example
-library-example
+cinnabar-text

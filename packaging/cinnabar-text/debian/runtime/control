@@ -1,0 +1,8 @@
+Package: libcinnabar-text
+Version: 0.0.0
+Section: lib
+Priority: optional
+Architecture: all
+Depends: libcinnabar-render, libcinnabar-core, libassimp5, libsdl2-2.0-0
+Maintainer: tumblegamer@gmail.com
+Description: Cinnabar Text
